@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Quién está viendo ahora?</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/inicio.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <img src="https://i.postimg.cc/MGZ0ywPc/DALL-E-2025-03-14-18-07-19-A-playful-and-colorful-logo-for-Kidstube-a-children-s-movie-website.png" alt="Decorative Image"
+        style="position: fixed; top: 0; left: 0; width: 100px;">
+
+    <div class="container mt-5 d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+        <div class="text-center">
+            <h2 class="mb-4 text-white">¿Quién está viendo ahora?</h2>
+            <div class="d-flex justify-content-center flex-wrap" id="contenedor-perfiles">
+                <!-- Los perfiles se cargarán aquí dinámicamente -->
+            </div>
+            <button type="button" class="btn btn-primary mt-4" id="administrarPerfilesBtn">Administrador</button>
+        </div>
+    </div>
+
+    <!-- Modal para ingresar PIN -->
+    <div class="modal fade" id="pinModal" tabindex="-1" role="dialog" aria-labelledby="pinModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pinModalLabel">Ingresar PIN</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="pinForm">
+                        <div class="form-group">
+                            <label for="userPin">PIN:</label>
+                            <input type="password" class="form-control" id="userPin" required>
+                        </div>
+                        <button id="verificarPinBtn" type="submit" class="btn btn-primary">Verificar PIN</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="adminPinModal" tabindex="-1" role="dialog" aria-labelledby="adminPinModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adminPinModalLabel">Ingresar PIN de Administrador</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="adminPinForm">
+                        <div class="form-group">
+                            <label for="adminPin">PIN de Administrador:</label>
+                            <input type="password" class="form-control" id="adminPin" required>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="verificarAdminPin()">Verificar
+                            PIN</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js/inicio.js"></script>
+</body>
+
+</html>

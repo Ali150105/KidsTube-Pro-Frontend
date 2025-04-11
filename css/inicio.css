@@ -1,0 +1,19 @@
+body,
+.bg-pure-black {
+    background-color: #000000 !important;
+}
+
+/* Estilos para los perfiles */
+.perfil:hover img {
+    border: 2px solid white;
+    /* Borde blanco */
+    cursor: pointer;
+    /* Cambia el cursor a una mano para indicar que es clickeable */
+}
+
+.perfil:hover p {
+    font-weight: bold;
+    /* Hace el texto en negrita */
+    color: white;
+    /* Cambia el color del texto a blanco */
+}

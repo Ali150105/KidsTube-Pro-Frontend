@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Videos</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <img src="https://i.postimg.cc/MGZ0ywPc/DALL-E-2025-03-14-18-07-19-A-playful-and-colorful-logo-for-Kidstube-a-children-s-movie-website.png" alt="Decorative Image" style="position: fixed; top: 0; right: 0; width: 100px; z-index: 1;">
+
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #d43183c6;">
+        <a class="navbar-brand" href="#">Gestión de Videos</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="redirectaddUser()">Añadir Usuarios</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="redirectaddPlaylist()">Playlists</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="#" onclick="redirectaddVideo()">Añadir Vídeos <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="salir()">Salir</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="salirC()">Cerrar sesión</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Sección de Playlists -->
+    <div class="container mt-5" id="playlistsSection">
+        <h2>Lista de Playlists</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Total de Videos</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="lista-playlists"></tbody>
+        </table>
+    </div>
+
+    <!-- Sección de Videos (se muestra al seleccionar una playlist) -->
+    <div class="container mt-5" id="videosSection" style="display: none;">
+        <h2>Videos de la Playlist: <span id="nombrePlaylistSeleccionada"></span></h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>URL</th>
+                    <th>Descripción</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="lista-videos"></tbody>
+        </table>
+        <button type="button" class="btn btn-success" id="agregarNuevoVideoBtn" data-toggle="modal" data-target="#agregarVideoModal">Agregar Nuevo</button>
+        <button type="button" class="btn btn-secondary" onclick="volverAPlaylists()">Volver a Playlists</button>
+    </div>
+
+    <!-- Modal de agregar Video -->
+    <div class="modal fade" id="agregarVideoModal" tabindex="-1" aria-labelledby="agregarVideoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="agregarVideoModalLabel">Agregar Nuevo Video</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-agregar-video">
+                        <div class="form-group">
+                            <label for="nombreVideo">Nombre del Video (*)</label>
+                            <input type="text" class="form-control" id="nombreVideo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="urlVideo">URL de YouTube (*)</label>
+                            <input type="url" class="form-control" id="urlVideo" required pattern="^(https?://)?(www\.youtube\.com|youtu\.be)/.+$" title="Debe ser una URL válida de YouTube">
+                        </div>
+                        <div class="form-group">
+                            <label for="descripcionVideo">Descripción</label>
+                            <textarea class="form-control" id="descripcionVideo"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="agregarVideo()">Agregar Video</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de editar Video -->
+    <div class="modal fade" id="editarVideoModal" tabindex="-1" aria-labelledby="editarVideoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editarVideoModalLabel">Editar Video</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-editar-video">
+                        <div class="form-group">
+                            <label for="editNombreVideo">Nombre del Video (*)</label>
+                            <input type="text" class="form-control" id="editNombreVideo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editUrlVideo">URL de YouTube (*)</label>
+                            <input type="url" class="form-control" id="editUrlVideo" required pattern="^(https?://)?(www\.youtube\.com|youtu\.be)/.+$" title="Debe ser una URL válida de YouTube">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDescripcionVideo">Descripción</label>
+                            <textarea class="form-control" id="editDescripcionVideo"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarCambiosVideo()">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js/addVideo.js"></script>
+</body>
+</html>

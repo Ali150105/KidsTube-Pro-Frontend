@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlists del Perfil</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/mostrarVideos.css">
+</head>
+<body>
+    <img src="https://i.postimg.cc/MGZ0ywPc/DALL-E-2025-03-14-18-07-19-A-playful-and-colorful-logo-for-Kidstube-a-children-s-movie-website.png" alt="Decorative Image" style="position: fixed; top: 0; right: 0; width: 100px; z-index: 1;">
+
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #d43183c6;">
+        <a class="navbar-brand" href="#">Gestión de Usuarios</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="salir()">Salir</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Sección de Playlists -->
+    <div class="container mt-5" id="playlistsSection">
+        <h2>Playlists Disponibles</h2>
+        <!-- Campo de búsqueda -->
+        <form class="search-form" onsubmit="buscarVideos(event)">
+            <div class="input-group">
+                <input type="text" class="form-control" id="searchInput" placeholder="Buscar videos por nombre o descripción..." required>
+                <div class="input-group-append">
+                    <button class="btn" type="submit">Buscar</button>
+                </div>
+            </div>
+        </form>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Total de Videos</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="lista-playlists"></tbody>
+        </table>
+    </div>
+
+    <!-- Sección de Resultados de Búsqueda -->
+    <div class="container mt-5" id="searchResultsSection" style="display: none;">
+        <h2>Resultados de la Búsqueda</h2>
+        <div class="row" id="lista-resultados">
+            <!-- Los resultados de búsqueda se cargarán aquí dinámicamente como tarjetas -->
+        </div>
+        <button type="button" class="btn btn-secondary mt-4" onclick="volverAPlaylists()">Volver a Playlists</button>
+    </div>
+
+    <!-- Sección de Videos (se muestra al seleccionar una playlist) -->
+    <div class="container mt-5" id="videosSection" style="display: none;">
+        <h2>Videos de la Playlist: <span id="nombrePlaylistSeleccionada"></span></h2>
+        <div class="row" id="lista-videos">
+            <!-- Los videos se cargarán aquí dinámicamente como tarjetas -->
+        </div>
+        <button type="button" class="btn btn-secondary mt-4" onclick="volverAPlaylists()">Volver a Playlists</button>
+    </div>
+
+    <!-- Modal para el reproductor de video -->
+    <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="videoModalLabel">Reproduciendo Video</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="videoPlayer" class="video-player" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js/mostrarVideos.js"></script>
+</body>
+</html>
