@@ -1,12 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Verifica si hay un token en el localStorage
     const authToken = localStorage.getItem('token');
     if (!authToken) {
         window.location.href = '/index.html';
         return;
     }
 
-    // Si hay un token, carga los perfiles
     cargarPerfiles();
 
     document.getElementById('administrarPerfilesBtn').addEventListener('click', function () {
@@ -17,13 +15,36 @@ document.addEventListener('DOMContentLoaded', function () {
 async function cargarPerfiles() {
     const authToken = localStorage.getItem('token');
     try {
-        const respuesta = await fetch('http://localhost:3000/usuarios', {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
+        const query = `
+            query {
+                profiles {
+                    id
+                    nombreCompleto
+                    pin
+                    avatar
+                    edad
+                }
             }
-        });
-        const perfiles = await respuesta.json();
+        `;
 
+        const response = await fetch('http://localhost:4000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ query })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.errors?.[0]?.message || 'Error al obtener perfiles');
+        }
+
+        const data = await response.json();
+        console.log('Perfiles recibidos (GraphQL):', data.data.profiles);
+        
+        const perfiles = data.data.profiles;
         const contenedor = document.getElementById('contenedor-perfiles');
         contenedor.innerHTML = '';
 
@@ -31,7 +52,7 @@ async function cargarPerfiles() {
             const col = document.createElement('div');
             col.className = 'text-muted col-6 col-sm-4 col-md-3 col-lg-2 mb-3 perfil';
             col.innerHTML = `
-                <img src="${perfil.avatar}" class="img-fluid rounded mb-2 text-white" alt="Perfil de ${perfil.nombreCompleto}" data-id="${perfil._id}" data-pin="${perfil.pin}">
+                <img src="${perfil.avatar}" class="img-fluid rounded mb-2 text-white" alt="Perfil de ${perfil.nombreCompleto}" data-id="${perfil.id}" data-pin="${perfil.pin}">
                 <p>${perfil.nombreCompleto}</p>
             `;
             col.querySelector('img').addEventListener('click', function () {
@@ -45,6 +66,7 @@ async function cargarPerfiles() {
         });
     } catch (error) {
         console.error('Error al cargar perfiles:', error);
+        alert('Error al cargar perfiles: ' + error.message);
     }
 }
 
@@ -57,7 +79,6 @@ document.getElementById('pinForm').addEventListener('submit', function (e) {
     if (userPinInput === userPinExpected) {
         $('#pinModal').modal('hide');
         alert('PIN correcto, accediendo al perfil...');
-        // Almacenar el userId en localStorage para usarlo en mostrarVideos.js
         localStorage.setItem('restrictedUserId', userId);
         window.location.href = '/mostrarVideos.html';
     } else {
