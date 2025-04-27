@@ -70,7 +70,13 @@ async function verificarAdminPin() {
     const authToken = localStorage.getItem('token');
 
     if (!authToken) {
-        alert('No estás autorizado');
+        alert('No estás autenticado. Por favor, inicia sesión.');
+        window.location.href = '/index.html';
+        return;
+    }
+
+    if (!adminPinInput) {
+        alert('Por favor, ingresa un PIN.');
         return;
     }
 
@@ -78,22 +84,23 @@ async function verificarAdminPin() {
         const response = await fetch('http://localhost:3000/auth/verificarPin', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify({ token: authToken, userPin: adminPinInput })
         });
 
+        const data = await response.json();
+
         if (response.ok) {
-            const data = await response.json();
             alert('PIN correcto, accediendo a la administración...');
             window.location.href = '/addUser.html';
             $('#adminPinModal').modal('hide');
         } else {
-            const error = await response.json();
-            alert(error.error);
+            alert(data.error || 'Error al verificar el PIN');
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error al verificar el PIN');
+        console.error('Error al verificar el PIN:', error);
+        alert('Error de conexión. Asegúrate de que el servidor esté corriendo.');
     }
 }

@@ -1,12 +1,10 @@
 $(document).ready(function () {
-    // Verifica token
     const authToken = localStorage.getItem('token');
     if (!authToken) {
         window.location.href = '/index.html';
         return;
     }
 
-    // Verificar y agregar event listeners solo si los elementos existen
     const avatarInput = document.getElementById('avatarInput');
     const editAvatarInput = document.getElementById('editAvatarInput');
 
@@ -22,10 +20,9 @@ $(document).ready(function () {
         });
     }
 
-    obtenerUsuarios(); // Cargar usuarios
+    obtenerUsuarios();
 });
 
-// Función para previsualizar la imagen seleccionada
 function previewImage(event, previewId, hiddenInputId) {
     const file = event.target.files[0];
     if (file) {
@@ -45,7 +42,6 @@ function previewImage(event, previewId, hiddenInputId) {
     }
 }
 
-// Función para obtener y mostrar los usuarios
 const obtenerUsuarios = async () => {
     try {
         const authToken = localStorage.getItem('token');
@@ -53,24 +49,49 @@ const obtenerUsuarios = async () => {
             throw new Error('Token de autorización no proporcionado');
         }
 
-        const response = await fetch('http://localhost:3000/usuarios', {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
+        const query = `
+            query {
+                profiles {
+                    id
+                    nombreCompleto
+                    pin
+                    avatar
+                    edad
+                }
             }
+        `;
+
+        const response = await fetch('http://localhost:4000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ query })
         });
 
-        const usuarios = await response.json();
-        mostrarUsuarios(usuarios);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.errors?.[0]?.message || 'Error al obtener usuarios');
+        }
+
+        const data = await response.json();
+        console.log('Usuarios recibidos (GraphQL):', data.data.profiles);
+        mostrarUsuarios(data.data.profiles);
     } catch (error) {
         console.error('Error al obtener usuarios:', error);
+        alert('Error al cargar usuarios: ' + error.message);
     }
 };
 
-// Función para mostrar los usuarios en la tabla
 const mostrarUsuarios = (usuarios) => {
     const listaUsuarios = document.getElementById('lista-usuarios');
     if (listaUsuarios) {
         listaUsuarios.innerHTML = '';
+        if (usuarios.length === 0) {
+            listaUsuarios.innerHTML = '<tr><td colspan="5">No hay usuarios registrados.</td></tr>';
+            return;
+        }
         usuarios.forEach(usuario => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -79,8 +100,8 @@ const mostrarUsuarios = (usuarios) => {
                 <td><img src="${usuario.avatar}" style="width:50px;height:50px;"></td>
                 <td>${usuario.edad}</td>
                 <td>
-                    <button class="btn btn-primary" onclick="mostrarModalEditar('${usuario._id}', '${usuario.nombreCompleto}', '${usuario.pin}', '${usuario.avatar}', '${usuario.edad}')">Editar</button>
-                    <button class="btn btn-danger" onclick="eliminarUsuario('${usuario._id}')">Eliminar</button>
+                    <button class="btn btn-primary" onclick="mostrarModalEditar('${usuario.id}', '${usuario.nombreCompleto}', '${usuario.pin}', '${usuario.avatar}', '${usuario.edad}')">Editar</button>
+                    <button class="btn btn-danger" onclick="eliminarUsuario('${usuario.id}')">Eliminar</button>
                 </td>
             `;
             listaUsuarios.appendChild(tr);
@@ -88,7 +109,6 @@ const mostrarUsuarios = (usuarios) => {
     }
 };
 
-// Función para agregar un usuario
 const agregarUsuario = async () => {
     const nombreCompleto = document.getElementById('nombreCompleto')?.value;
     const pin = document.getElementById('pin')?.value;
@@ -123,20 +143,20 @@ const agregarUsuario = async () => {
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.log(errorData);
-            alert('Hubo un error al procesar la solicitud: ' + errorData.message);
-        } else {
-            alert('Usuario agregado exitosamente');
-            obtenerUsuarios();
-            $('#agregarUsuarioModal').modal('hide');
+            console.error('Error del servidor:', errorData);
+            alert(`Error al agregar usuario: ${errorData.error || 'Error desconocido'}`);
+            return;
         }
+
+        alert('Usuario agregado exitosamente');
+        obtenerUsuarios();
+        $('#agregarUsuarioModal').modal('hide');
     } catch (error) {
         console.error('Error al agregar usuario:', error);
-        alert('Hubo un error al procesar la solicitud: ' + error.message);
+        alert('Error de conexión: ' + error.message);
     }
 };
 
-// Función para mostrar el modal de edición
 const mostrarModalEditar = (id, nombreCompleto, pin, avatar, edad) => {
     const editNombreCompleto = document.getElementById('editNombreCompleto');
     const editPin = document.getElementById('editPin');
@@ -155,7 +175,6 @@ const mostrarModalEditar = (id, nombreCompleto, pin, avatar, edad) => {
     $('#editarUsuarioModal').modal('show');
 };
 
-// Función para guardar los cambios del usuario editado
 const guardarCambiosUsuario = async () => {
     const formEditarUsuario = document.getElementById('form-editar-usuario');
     if (!formEditarUsuario) return;
@@ -193,10 +212,10 @@ const guardarCambiosUsuario = async () => {
         $('#editarUsuarioModal').modal('hide');
     } catch (error) {
         console.error('Error al guardar cambios:', error);
+        alert('Error al guardar cambios: ' + error.message);
     }
 };
 
-// Función para eliminar un usuario
 const eliminarUsuario = async (id) => {
     if (confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
         try {
@@ -211,6 +230,7 @@ const eliminarUsuario = async (id) => {
             obtenerUsuarios();
         } catch (error) {
             console.error('Error al eliminar usuario:', error);
+            alert('Error al eliminar usuario: ' + error.message);
         }
     }
 };
@@ -218,12 +238,15 @@ const eliminarUsuario = async (id) => {
 function redirectaddUser() {
     window.location.href = '/addUser.html';
 }
+
 function redirectaddVideo() {
     window.location.href = '/addVideo.html';
 }
+
 function salir() {
     window.location.href = '/inicio.html';
 }
+
 function salirC() {
     localStorage.removeItem('token');
     window.location.href = '/index.html';

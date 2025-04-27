@@ -1,48 +1,35 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const registerForm = document.getElementById('registerForm');
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-    registerForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const repeatPassword = document.getElementById('repeatPassword').value;
-        const pin = document.getElementById('pin').value;
-        const firstName = document.getElementById('firstName').value;
-        const lastName = document.getElementById('lastName').value;
-        const country = document.getElementById('country').value;
-        const dateOfBirth = document.getElementById('dateOfBirth').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const phoneNumber = document.getElementById('phoneNumber').value;
+  const pin = document.getElementById('pin').value;
+  const name = document.getElementById('name').value;
+  const lastName = document.getElementById('lastName').value;
+  const country = document.getElementById('country').value;
+  const birthDate = document.getElementById('birthDate').value;
 
-        // Validaciones
-        if (password !== repeatPassword) {
-            alert('Las contraseñas no coinciden.');
-            return;
-        }
+  if (password !== confirmPassword) {
+    document.getElementById('message').innerText = 'Las contraseñas no coinciden';
+    return;
+  }
 
-        if (!/^\d{6}$/.test(pin)) {
-            alert('El PIN debe contener exactamente 6 números.');
-            return;
-        }
-
-        try {
-            const response = await fetch('http://localhost:3000/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password, pin, firstName, lastName, country, dateOfBirth })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                alert('Usuario registrado exitosamente.');
-                window.location.href = '/index.html';
-            } else {
-                alert(data.error || 'Error al registrar el usuario.');
-            }
-        } catch (error) {
-            console.error('Error en el registro:', error);
-            alert('Hubo un error al procesar la solicitud.');
-        }
+  try {
+    const response = await fetch('http://localhost:3000/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, phoneNumber, pin, name, lastName, country, birthDate })
     });
+
+    const data = await response.json();
+    if (response.ok) {
+      document.getElementById('message').innerText = 'Registro exitoso. Revisa tu correo para verificar tu cuenta.';
+    } else {
+      document.getElementById('message').innerText = data.message || 'Error al registrarse';
+    }
+  } catch (error) {
+    document.getElementById('message').innerText = 'Error de conexión';
+  }
 });
