@@ -24,21 +24,41 @@ const obtenerPlaylists = async () => {
             throw new Error('Token o ID de usuario restringido no proporcionado');
         }
 
-        const response = await fetch('http://localhost:3000/playlists/restringido', {
+        const query = `
+            query($restrictedUserId: ID) {
+                playlists(restrictedUserId: $restrictedUserId) {
+                    id
+                    nombre
+                    totalVideos
+                }
+            }
+        `;
+
+        const response = await fetch('http://localhost:4000/graphql', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ restrictedUserId })
+            body: JSON.stringify({
+                query,
+                variables: { restrictedUserId }
+            })
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || 'Error al obtener las playlists');
+            console.error('Error en la respuesta:', errorData);
+            throw new Error(errorData.errors?.[0]?.message || 'Error al obtener las playlists');
         }
 
-        const playlists = await response.json();
+        const data = await response.json();
+        console.log('Respuesta de playlists:', data); // Depuración
+        if (data.errors) {
+            throw new Error(data.errors[0].message || 'Error en la consulta GraphQL');
+        }
+
+        const playlists = data.data.playlists;
         if (playlists.length === 0) {
             alert('No hay playlists asignadas a este perfil.');
         }
@@ -60,7 +80,7 @@ const mostrarPlaylists = (playlists) => {
                 <td>${playlist.nombre}</td>
                 <td>${playlist.totalVideos || 0}</td>
                 <td>
-                    <button class="btn btn-primary" onclick="mostrarVideos('${playlist._id}', '${playlist.nombre}')">Ver Videos</button>
+                    <button class="btn btn-primary" onclick="mostrarVideos('${playlist.id}', '${playlist.nombre}')">Ver Videos</button>
                 </td>
             `;
             listaPlaylists.appendChild(tr);
@@ -99,21 +119,44 @@ const buscarVideos = async (event) => {
     try {
         const authToken = localStorage.getItem('token');
         const restrictedUserId = localStorage.getItem('restrictedUserId');
-        const response = await fetch('http://localhost:3000/videos/buscar', {
+        const query = `
+            query($query: String!) {
+                searchVideos(query: $query) {
+                    id
+                    nombre
+                    url
+                    descripcion
+                    playlistId
+                    userId
+                }
+            }
+        `;
+
+        const response = await fetch('http://localhost:4000/graphql', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ restrictedUserId, searchText })
+            body: JSON.stringify({
+                query,
+                variables: { query: searchText }
+            })
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || 'Error al buscar videos');
+            console.error('Error en la respuesta:', errorData);
+            throw new Error(errorData.errors?.[0]?.message || 'Error al buscar videos');
         }
 
-        const videos = await response.json();
+        const data = await response.json();
+        console.log('Respuesta de videos:', data); // Depuración
+        if (data.errors) {
+            throw new Error(data.errors[0].message || 'Error en la consulta GraphQL');
+        }
+
+        const videos = data.data.searchVideos;
         document.getElementById('playlistsSection').style.display = 'none';
         document.getElementById('videosSection').style.display = 'none';
         document.getElementById('searchResultsSection').style.display = 'block';

@@ -29,7 +29,6 @@ const obtenerPlaylists = async () => {
         mostrarPlaylists(playlists);
     } catch (error) {
         console.error('Error al obtener playlists:', error);
-        alert('Error al obtener playlists: ' + error.message);
     }
 };
 
@@ -55,8 +54,8 @@ const mostrarVideos = async (playlistId, playlistNombre) => {
     try {
         const authToken = localStorage.getItem('token');
         const query = `
-            query($playlistId: ID) {
-                videos(playlistId: $playlistId) {
+            query {
+                videos {
                     id
                     nombre
                     url
@@ -73,25 +72,16 @@ const mostrarVideos = async (playlistId, playlistNombre) => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({
-                query,
-                variables: { playlistId }
-            })
+            body: JSON.stringify({ query })
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Error en la respuesta:', errorData);
             throw new Error(errorData.errors?.[0]?.message || 'Error al obtener los videos');
         }
 
         const data = await response.json();
-        console.log('Respuesta de videos:', data); // Depuración
-        if (data.errors) {
-            throw new Error(data.errors[0].message || 'Error en la consulta GraphQL');
-        }
-
-        const videos = data.data.videos;
+        const videos = data.data.videos.filter(video => video.playlistId === playlistId);
 
         document.getElementById('playlistsSection').style.display = 'none';
         document.getElementById('videosSection').style.display = 'block';
@@ -102,23 +92,19 @@ const mostrarVideos = async (playlistId, playlistNombre) => {
         const listaVideos = document.getElementById('lista-videos');
         if (listaVideos) {
             listaVideos.innerHTML = '';
-            if (videos.length === 0) {
-                listaVideos.innerHTML = '<tr><td colspan="4" class="text-center">No hay videos en esta playlist.</td></tr>';
-            } else {
-                videos.forEach(video => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${video.nombre}</td>
-                        <td><a href="${video.url}" target="_blank">${video.url}</a></td>
-                        <td>${video.descripcion || 'Sin descripción'}</td>
-                        <td>
-                            <button class="btn btn-primary" onclick="mostrarModalEditarVideo('${video.id}', '${video.nombre}', '${video.url}', '${video.descripcion || ''}')">Editar</button>
-                            <button class="btn btn-danger" onclick="eliminarVideo('${video.id}', '${playlistId}')">Eliminar</button>
-                        </td>
-                    `;
-                    listaVideos.appendChild(tr);
-                });
-            }
+            videos.forEach(video => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${video.nombre}</td>
+                    <td><a href="${video.url}" target="_blank">${video.url}</a></td>
+                    <td>${video.descripcion || 'Sin descripción'}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="mostrarModalEditarVideo('${video.id}', '${video.nombre}', '${video.url}', '${video.descripcion || ''}')">Editar</button>
+                        <button class="btn btn-danger" onclick="eliminarVideo('${video.id}', '${playlistId}')">Eliminar</button>
+                    </td>
+                `;
+                listaVideos.appendChild(tr);
+            });
         }
     } catch (error) {
         console.error('Error al obtener videos:', error);

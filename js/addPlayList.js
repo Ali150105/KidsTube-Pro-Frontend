@@ -19,6 +19,9 @@ const obtenerPerfiles = async () => {
                 'Authorization': `Bearer ${authToken}`
             }
         });
+        if (!response.ok) {
+            throw new Error('Error al obtener los perfiles');
+        }
         const perfiles = await response.json();
         const selectAgregar = document.getElementById('perfilesAsociados');
         const selectEditar = document.getElementById('editPerfilesAsociados');
@@ -31,6 +34,7 @@ const obtenerPerfiles = async () => {
         });
     } catch (error) {
         console.error('Error al obtener perfiles:', error);
+        alert('Hubo un error al cargar los perfiles: ' + error.message);
     }
 };
 
@@ -42,20 +46,45 @@ const obtenerPlaylists = async () => {
             throw new Error('Token de autorización no proporcionado');
         }
 
-        const response = await fetch('http://localhost:3000/playlists', {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
+        const query = `
+            query {
+                playlists {
+                    id
+                    nombre
+                    totalVideos
+                    perfilesAsociados {
+                        id
+                        nombreCompleto
+                    }
+                }
             }
+        `;
+
+        const response = await fetch('http://localhost:4000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ query })
         });
 
         if (!response.ok) {
-            throw new Error('Error al obtener las playlists');
+            const errorData = await response.json();
+            throw new Error(errorData.errors?.[0]?.message || 'Error al obtener las playlists');
         }
 
-        const playlists = await response.json();
+        const data = await response.json();
+        console.log('Respuesta de playlists:', data); // Depuración
+        if (data.errors) {
+            throw new Error(data.errors[0].message || 'Error en la consulta GraphQL');
+        }
+
+        const playlists = data.data.playlists;
         mostrarPlaylists(playlists);
     } catch (error) {
         console.error('Error al obtener playlists:', error);
+        alert('Hubo un error al cargar las playlists: ' + error.message);
     }
 };
 
@@ -67,7 +96,7 @@ const mostrarPlaylists = (playlists) => {
         playlists.forEach(playlist => {
             // Asegurarse de que perfilesAsociados sea un array válido antes de procesarlo
             const perfilesIds = playlist.perfilesAsociados && Array.isArray(playlist.perfilesAsociados)
-                ? JSON.stringify(playlist.perfilesAsociados.map(p => p._id))
+                ? JSON.stringify(playlist.perfilesAsociados.map(p => p.id))
                 : '[]'; // Si no hay perfiles, usar un array vacío como string
             const perfilesNombres = playlist.perfilesAsociados && Array.isArray(playlist.perfilesAsociados)
                 ? playlist.perfilesAsociados.map(p => p.nombreCompleto).join(', ')
@@ -79,8 +108,8 @@ const mostrarPlaylists = (playlists) => {
                 <td>${playlist.totalVideos || 0}</td>
                 <td>${perfilesNombres}</td>
                 <td>
-                    <button class="btn btn-primary" onclick="mostrarModalEditarPlaylist('${playlist._id}', '${playlist.nombre}', '${encodeURIComponent(perfilesIds)}')">Editar</button>
-                    <button class="btn btn-danger" onclick="eliminarPlaylist('${playlist._id}')">Eliminar</button>
+                    <button class="btn btn-primary" onclick="mostrarModalEditarPlaylist('${playlist.id}', '${playlist.nombre}', '${encodeURIComponent(perfilesIds)}')">Editar</button>
+                    <button class="btn btn-danger" onclick="eliminarPlaylist('${playlist.id}')">Eliminar</button>
                 </td>
             `;
             listaPlaylists.appendChild(tr);
