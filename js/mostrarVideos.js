@@ -155,18 +155,45 @@ const buscarVideos = async (event) => {
 const mostrarVideos = async (playlistId, playlistNombre) => {
     try {
         const authToken = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:3000/videos/playlist/${playlistId}`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
+        const query = `
+            query($playlistId: ID) {
+                videos(playlistId: $playlistId) {
+                    id
+                    nombre
+                    url
+                    descripcion
+                    playlistId
+                    userId
+                }
             }
+        `;
+
+        const response = await fetch('http://localhost:4000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                query,
+                variables: { playlistId }
+            })
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || 'Error al obtener los videos');
+            console.error('Error en la respuesta:', errorData);
+            throw new Error(errorData.errors?.[0]?.message || 'Error al obtener los videos');
         }
 
-        const videos = await response.json();
+        const data = await response.json();
+        console.log('Respuesta de videos:', data); // Depuración
+        if (data.errors) {
+            throw new Error(data.errors[0].message || 'Error en la consulta GraphQL');
+        }
+
+        const videos = data.data.videos;
+
         document.getElementById('playlistsSection').style.display = 'none';
         document.getElementById('searchResultsSection').style.display = 'none';
         document.getElementById('videosSection').style.display = 'block';
@@ -175,24 +202,28 @@ const mostrarVideos = async (playlistId, playlistNombre) => {
         const listaVideos = document.getElementById('lista-videos');
         if (listaVideos) {
             listaVideos.innerHTML = '';
-            videos.forEach(video => {
-                const videoId = obtenerVideoId(video.url);
-                const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/0.jpg` : 'https://via.placeholder.com/320x180?text=Sin+Miniatura';
+            if (videos.length === 0) {
+                listaVideos.innerHTML = '<p class="text-center">No hay videos en esta playlist.</p>';
+            } else {
+                videos.forEach(video => {
+                    const videoId = obtenerVideoId(video.url);
+                    const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/0.jpg` : 'https://via.placeholder.com/320x180?text=Sin+Miniatura';
 
-                const card = document.createElement('div');
-                card.className = 'col-md-4 col-sm-6 mb-4';
-                card.innerHTML = `
-                    <div class="video-card">
-                        <img src="${thumbnailUrl}" alt="Miniatura de ${video.nombre}">
-                        <div class="video-card-body">
-                            <h5 class="video-card-title">${video.nombre}</h5>
-                            <p class="video-card-text">${video.descripcion || 'Sin descripción'}</p>
-                            <button class="btn video-card-btn" onclick="reproducirVideo('${videoId}', '${video.nombre}')">Reproducir</button>
+                    const card = document.createElement('div');
+                    card.className = 'col-md-4 col-sm-6 mb-4';
+                    card.innerHTML = `
+                        <div class="video-card">
+                            <img src="${thumbnailUrl}" alt="Miniatura de ${video.nombre}">
+                            <div class="video-card-body">
+                                <h5 class="video-card-title">${video.nombre}</h5>
+                                <p class="video-card-text">${video.descripcion || 'Sin descripción'}</p>
+                                <button class="btn video-card-btn" onclick="reproducirVideo('${videoId}', '${video.nombre}')">Reproducir</button>
+                            </div>
                         </div>
-                    </div>
-                `;
-                listaVideos.appendChild(card);
-            });
+                    `;
+                    listaVideos.appendChild(card);
+                });
+            }
         }
     } catch (error) {
         console.error('Error al obtener videos:', error);
