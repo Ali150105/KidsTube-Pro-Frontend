@@ -5,28 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios Restringidos</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/addUser.css">
     <style>
-        /* Estilo para el botón de selección de archivo */
-        .custom-file-upload {
-            display: inline-block;
-            padding: 6px 12px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border-radius: 4px;
-            border: none;
-            margin-bottom: 10px;
+        /* Ajustar z-index para que la navbar esté por encima del logo */
+        .navbar {
+            position: relative;
+            z-index: 1000; /* Mayor que el z-index del logo */
         }
-        .custom-file-upload:hover {
-            background-color: #0056b3;
-        }
-        input[type="file"] {
-            display: none; /* Ocultamos el input por defecto */
+        /* Ajustar la posición del logo a la esquina inferior izquierda */
+        .logo-image {
+            position: fixed;
+            bottom: 10px; /* Cambiado de top a bottom */
+            left: 10px;   /* Cambiado de right a left */
+            width: 100px;
+            z-index: 1;
         }
     </style>
 </head>
 <body>
-    <img src="https://i.postimg.cc/MGZ0ywPc/DALL-E-2025-03-14-18-07-19-A-playful-and-colorful-logo-for-Kidstube-a-children-s-movie-website.png" alt="Decorative Image" style="position: fixed; top: 0; right: 0; width: 100px; z-index: 1;">
+    <!-- Logo ajustado con clase para estilizarlo -->
+    <img src="https://i.postimg.cc/MGZ0ywPc/DALL-E-2025-03-14-18-07-19-A-playful-and-colorful-logo-for-Kidstube-a-children-s-movie-website.png" alt="Decorative Image" class="logo-image">
 
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #d43183c6;">
         <a class="navbar-brand" href="#">Gestión de Usuarios</a>
@@ -157,11 +155,10 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
     <script src="js/addUser.js"></script>
     <script src="js/addPlayList.js"></script>
-
 </body>
 </html>

@@ -1,0 +1,33 @@
+.video-result {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #e8c7d0;
+    margin-bottom: 10px;
+}
+
+.video-result img {
+    width: 120px;
+    height: 90px;
+    margin-right: 15px;
+    border-radius: 10px;
+}
+
+.video-result h5 {
+    font-size: 1rem;
+    color: #d43183;
+    margin: 0;
+}
+
+.video-result p {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 5px 0 0;
+    max-height: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.video-result button {
+    margin-left: auto;
+}
