@@ -5,6 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Videos</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .video-result {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e8c7d0;
+            margin-bottom: 10px;
+        }
+        .video-result img {
+            width: 120px;
+            height: 90px;
+            margin-right: 15px;
+            border-radius: 10px;
+        }
+        .video-result h5 {
+            font-size: 1rem;
+            color: #d43183;
+            margin: 0;
+        }
+        .video-result p {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 5px 0 0;
+            max-height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .video-result button {
+            margin-left: auto;
+        }
+    </style>
 </head>
 <body>
     <img src="https://i.postimg.cc/MGZ0ywPc/DALL-E-2025-03-14-18-07-19-A-playful-and-colorful-logo-for-Kidstube-a-children-s-movie-website.png" alt="Decorative Image" style="position: fixed; top: 0; right: 0; width: 100px; z-index: 1;">
@@ -70,12 +101,12 @@
 
     <!-- Modal de agregar Video -->
     <div class="modal fade" id="agregarVideoModal" tabindex="-1" aria-labelledby="agregarVideoModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="agregarVideoModalLabel">Agregar Nuevo Video</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -86,8 +117,14 @@
                         </div>
                         <div class="form-group">
                             <label for="urlVideo">URL de YouTube (*)</label>
-                            <input type="url" class="form-control" id="urlVideo" required pattern="^(https?://)?(www\.youtube\.com|youtu\.be)/.+$" title="Debe ser una URL válida de YouTube">
+                            <input type="url" class="form-control" id="urlVideo" placeholder="Ej: https://www.youtube.com/watch?v=videoId">
                         </div>
+                        <div class="form-group">
+                            <label for="searchQuery">Buscar en YouTube</label>
+                            <input type="text" class="form-control" id="searchQuery" placeholder="Ej: canciones infantiles">
+                            <button type="button" class="btn btn-primary mt-2" onclick="searchVideos()">Buscar</button>
+                        </div>
+                        <div id="searchResults"></div>
                         <div class="form-group">
                             <label for="descripcionVideo">Descripción</label>
                             <textarea class="form-control" id="descripcionVideo"></textarea>
@@ -109,7 +146,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="editarVideoModalLabel">Editar Video</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -120,7 +157,7 @@
                         </div>
                         <div class="form-group">
                             <label for="editUrlVideo">URL de YouTube (*)</label>
-                            <input type="url" class="form-control" id="editUrlVideo" required pattern="^(https?://)?(www\.youtube\.com|youtu\.be)/.+$" title="Debe ser una URL válida de YouTube">
+                            <input type="url" class="form-control" id="editUrlVideo" required pattern="^(https?:\/\/)?(www\.youtube\.com|youtu\.be)\/.+$" title="Debe ser una URL válida de YouTube">
                         </div>
                         <div class="form-group">
                             <label for="editDescripcionVideo">Descripción</label>
@@ -140,6 +177,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
     <script src="js/addVideo.js"></script>
 </body>
 </html>

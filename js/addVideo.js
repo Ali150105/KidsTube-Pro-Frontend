@@ -5,9 +5,82 @@ $(document).ready(function () {
         return;
     }
 
+    // Cargar la biblioteca de Google API Client
+    gapi.load('client', initializeGapiClient);
     obtenerPlaylists();
 });
 
+// Inicializar gapi.client con la API Key
+async function initializeGapiClient() {
+    await gapi.client.init({
+        apiKey: 'AIzaSyDxNPU4MLmjtEMSIDa3hv5KLNpg5aqIpxw', 
+        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
+    });
+    console.log('gapi.client inicializado');
+}
+
+// Parsear videoId desde un URL
+const parseVideoId = (url) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+};
+
+// Buscar videos en YouTube
+const searchVideos = async () => {
+    const query = document.getElementById('searchQuery').value;
+    if (!query) {
+        alert('Por favor, ingresa un término de búsqueda');
+        return;
+    }
+
+    try {
+        const response = await gapi.client.youtube.search.list({
+            part: 'snippet',
+            q: query,
+            type: 'video',
+            maxResults: 10,
+            safeSearch: 'strict' // Filtrar contenido apto para niños
+        });
+
+        const videos = response.result.items;
+        const searchResults = document.getElementById('searchResults');
+        searchResults.innerHTML = '';
+
+        videos.forEach(video => {
+            const div = document.createElement('div');
+            div.className = 'video-result';
+            div.innerHTML = `
+                <img src="${video.snippet.thumbnails.default.url}" alt="${video.snippet.title}">
+                <div>
+                    <h5>${video.snippet.title}</h5>
+                    <p>${video.snippet.description}</p>
+                </div>
+                <button class="btn btn-primary" onclick="selectVideo('${video.id.videoId}', '${video.snippet.title.replace(/'/g, "\\'")}', '${video.snippet.description.replace(/'/g, "\\'")}')">Seleccionar</button>
+            `;
+            searchResults.appendChild(div);
+        });
+    } catch (error) {
+        console.error('Error al buscar videos:', error);
+        alert('Error al buscar videos: ' + error.message);
+    }
+};
+
+// Seleccionar un video de los resultados
+const selectVideo = (videoId, title, description) => {
+    document.getElementById('urlVideo').value = `https://www.youtube.com/watch?v=${videoId}`;
+    document.getElementById('nombreVideo').value = title;
+    document.getElementById('descripcionVideo').value = description;
+    document.getElementById('searchResults').innerHTML = '';
+};
+
+// Validar URL de YouTube
+const validarYouTubeUrl = (url) => {
+    const regex = /^(https?:\/\/)?(www\.youtube\.com|youtu\.be)\/.+$/;
+    return regex.test(url);
+};
+
+// Obtener playlists
 const obtenerPlaylists = async () => {
     try {
         const authToken = localStorage.getItem('token');
@@ -41,7 +114,7 @@ const obtenerPlaylists = async () => {
         }
 
         const data = await response.json();
-        console.log('Respuesta de playlists:', data); // Depuración
+        console.log('Respuesta de playlists:', data);
         if (data.errors) {
             throw new Error(data.errors[0].message || 'Error en la consulta GraphQL');
         }
@@ -54,6 +127,7 @@ const obtenerPlaylists = async () => {
     }
 };
 
+// Mostrar playlists
 const mostrarPlaylists = (playlists) => {
     const listaPlaylists = document.getElementById('lista-playlists');
     if (listaPlaylists) {
@@ -72,6 +146,7 @@ const mostrarPlaylists = (playlists) => {
     }
 };
 
+// Mostrar videos de una playlist
 const mostrarVideos = async (playlistId, playlistNombre) => {
     try {
         const authToken = localStorage.getItem('token');
@@ -84,6 +159,7 @@ const mostrarVideos = async (playlistId, playlistNombre) => {
                     descripcion
                     playlistId
                     userId
+                    thumbnail
                 }
             }
         `;
@@ -107,7 +183,7 @@ const mostrarVideos = async (playlistId, playlistNombre) => {
         }
 
         const data = await response.json();
-        console.log('Respuesta de videos:', data); // Depuración
+        console.log('Respuesta de videos:', data);
         if (data.errors) {
             throw new Error(data.errors[0].message || 'Error en la consulta GraphQL');
         }
@@ -147,17 +223,14 @@ const mostrarVideos = async (playlistId, playlistNombre) => {
     }
 };
 
+// Volver a la lista de playlists
 const volverAPlaylists = () => {
     document.getElementById('videosSection').style.display = 'none';
     document.getElementById('playlistsSection').style.display = 'block';
     obtenerPlaylists();
 };
 
-const validarYouTubeUrl = (url) => {
-    const regex = /^(https?:\/\/)?(www\.youtube\.com|youtu\.be)\/.+$/;
-    return regex.test(url);
-};
-
+// Agregar video
 const agregarVideo = async () => {
     const form = document.getElementById('form-agregar-video');
     if (!form.checkValidity()) {
@@ -165,43 +238,62 @@ const agregarVideo = async () => {
         return;
     }
 
-    const nombre = document.getElementById('nombreVideo')?.value;
-    const url = document.getElementById('urlVideo')?.value;
-    const descripcion = document.getElementById('descripcionVideo')?.value;
+    const nombre = document.getElementById('nombreVideo').value;
+    let url = document.getElementById('urlVideo').value;
+    const descripcion = document.getElementById('descripcionVideo').value;
     const playlistId = form.getAttribute('data-playlist-id');
     const token = localStorage.getItem('token');
 
-    if (!validarYouTubeUrl(url)) {
+    let videoId = parseVideoId(url);
+    let thumbnail = '';
+
+    if (!videoId || !validarYouTubeUrl(url)) {
         alert('Por favor, ingresa una URL válida de YouTube.');
         return;
     }
 
     try {
-        const response = await fetch('http://localhost:3000/videos', {
+        // Obtener detalles del video desde YouTube API
+        const response = await gapi.client.youtube.videos.list({
+            part: 'snippet',
+            id: videoId
+        });
+
+        const video = response.result.items[0];
+        if (!video) {
+            alert('Video no encontrado en YouTube');
+            return;
+        }
+
+        thumbnail = video.snippet.thumbnails.default.url;
+
+        // Enviar al backend
+        const addResponse = await fetch('http://localhost:3000/videos', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ nombre, url, descripcion, playlistId })
+            body: JSON.stringify({ nombre, url, descripcion, playlistId, videoId, thumbnail })
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
+        if (!addResponse.ok) {
+            const errorData = await addResponse.json();
             throw new Error(errorData.error || 'Error al agregar el video');
         }
 
         alert('Video agregado exitosamente');
         mostrarVideos(playlistId, document.getElementById('nombrePlaylistSeleccionada').textContent);
         $('#agregarVideoModal').modal('hide');
-        document.getElementById('form-agregar-video')?.reset();
-        document.getElementById('agregarNuevoVideoBtn')?.focus();
+        document.getElementById('form-agregar-video').reset();
+        document.getElementById('agregarNuevoVideoBtn').focus();
     } catch (error) {
         console.error('Error al agregar video:', error);
         alert('Hubo un error al procesar la solicitud: ' + error.message);
     }
 };
 
+// Mostrar modal de edición
 const mostrarModalEditarVideo = (id, nombre, url, descripcion) => {
     const editNombreVideo = document.getElementById('editNombreVideo');
     const editUrlVideo = document.getElementById('editUrlVideo');
@@ -216,6 +308,7 @@ const mostrarModalEditarVideo = (id, nombre, url, descripcion) => {
     $('#editarVideoModal').modal('show');
 };
 
+// Guardar cambios en un video
 const guardarCambiosVideo = async () => {
     const form = document.getElementById('form-editar-video');
     if (!form.checkValidity()) {
@@ -225,13 +318,13 @@ const guardarCambiosVideo = async () => {
 
     const id = form.getAttribute('data-video-id');
     const playlistId = form.getAttribute('data-playlist-id');
-    const nuevoNombre = document.getElementById('editNombreVideo')?.value;
-    const nuevaUrl = document.getElementById('editUrlVideo')?.value;
-    const nuevaDescripcion = document.getElementById('editDescripcionVideo')?.value;
+    const nuevoNombre = document.getElementById('editNombreVideo').value;
+    const nuevaUrl = document.getElementById('editUrlVideo').value;
+    const nuevaDescripcion = document.getElementById('editDescripcionVideo').value;
     const token = localStorage.getItem('token');
 
     if (!validarYouTubeUrl(nuevaUrl)) {
-        alert('Por favor, ingresa una URL válida de YouTube.');
+        alert('Por favor, ingresa una URL válida de fábrica');
         return;
     }
 
@@ -253,13 +346,14 @@ const guardarCambiosVideo = async () => {
         alert('Video actualizado exitosamente');
         mostrarVideos(playlistId, document.getElementById('nombrePlaylistSeleccionada').textContent);
         $('#editarVideoModal').modal('hide');
-        document.getElementById('agregarNuevoVideoBtn')?.focus();
+        document.getElementById('agregarNuevoVideoBtn').focus();
     } catch (error) {
         console.error('Error al guardar cambios:', error);
         alert('Hubo un error al procesar la solicitud: ' + error.message);
     }
 };
 
+// Eliminar video
 const eliminarVideo = async (id, playlistId) => {
     if (confirm('¿Estás seguro de que quieres eliminar este video?')) {
         try {
@@ -277,7 +371,7 @@ const eliminarVideo = async (id, playlistId) => {
 
             alert('Video eliminado exitosamente');
             mostrarVideos(playlistId, document.getElementById('nombrePlaylistSeleccionada').textContent);
-            document.getElementById('agregarNuevoVideoBtn')?.focus();
+            document.getElementById('agregarNuevoVideoBtn').focus();
         } catch (error) {
             console.error('Error al eliminar video:', error);
             alert('Hubo un error al procesar la solicitud: ' + error.message);
@@ -285,6 +379,7 @@ const eliminarVideo = async (id, playlistId) => {
     }
 };
 
+// Funciones de redirección
 function redirectaddUser() {
     window.location.href = '/addUser.html';
 }
