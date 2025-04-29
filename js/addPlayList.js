@@ -10,34 +10,6 @@ $(document).ready(function () {
     obtenerPerfiles();  // Cargar perfiles para los selects
 });
 
-// Función para obtener perfiles y llenar los selects
-const obtenerPerfiles = async () => {
-    try {
-        const authToken = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/usuarios', {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error('Error al obtener los perfiles');
-        }
-        const perfiles = await response.json();
-        const selectAgregar = document.getElementById('perfilesAsociados');
-        const selectEditar = document.getElementById('editPerfilesAsociados');
-        perfiles.forEach(perfil => {
-            const option = document.createElement('option');
-            option.value = perfil._id;
-            option.textContent = perfil.nombreCompleto;
-            if (selectAgregar) selectAgregar.appendChild(option.cloneNode(true));
-            if (selectEditar) selectEditar.appendChild(option.cloneNode(true));
-        });
-    } catch (error) {
-        console.error('Error al obtener perfiles:', error);
-        alert('Hubo un error al cargar los perfiles: ' + error.message);
-    }
-};
-
 // Función para obtener y mostrar las playlists
 const obtenerPlaylists = async () => {
     try {
