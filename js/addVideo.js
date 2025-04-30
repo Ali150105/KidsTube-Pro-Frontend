@@ -13,7 +13,7 @@ $(document).ready(function () {
 // Inicializar gapi.client con la API Key
 async function initializeGapiClient() {
     await gapi.client.init({
-        apiKey: 'AIzaSyDxNPU4MLmjtEMSIDa3hv5KLNpg5aqIpxw', 
+        apiKey: 'AIzaSyAYBvzADnSwhLbVEWyXXQ7u66vBVUpM9WQ', 
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
     });
     console.log('gapi.client inicializado');
