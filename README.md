@@ -15,11 +15,17 @@ La aplicación utiliza Node.js como entorno de ejecución, Express.js como frame
 ## Tecnologías utilizadas  
 
 Bootstrap: El maquillaje que hace todo bonito y responsive
+
 HTML/CSS: Los esqueletos y la ropa de la página
+
 JavaScript: El cerebro que hace que todo se mueva
+
 Google Sign-In: Para entrar con tu cuenta de Google (como cuando usas "Ingresar con Gmail")
+
 YouTube Data API: Nuestro buscador de videos seguros
+
 Twilio: El que manda SMS con códigos secretos al celular de mamá/papá
+
 Nodemailer: El cartero electrónico (envía emails de verificación)
 
 ## Instalación  
