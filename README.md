@@ -56,8 +56,8 @@ JWT_SECRET=tu_clave_secreta
 
 ```
 5. Inicia la aplicación:  
-}
+
 ```
 node app.js
-}
+
 ```
