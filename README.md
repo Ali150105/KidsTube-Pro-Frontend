@@ -34,13 +34,30 @@ Nodemailer: El cartero electrónico (envía emails de verificación)
 
 ## Instalación  
 1. Clona este repositorio en tu máquina local:  
+
+```
 https://github.com/Ali150105/KidsTube-Pro-Frontend
+```
 2. Navega al directorio del proyecto:  
+
+```
 cd kidstube-server
+```
 3. Instala las dependencias:  
+
+```
 npm install
+```
 4. Configura las variables de entorno en `.env`:   
+
+```
 MONGODB_URI=tu_cadena_de_conexión
 JWT_SECRET=tu_clave_secreta
+
+```
 5. Inicia la aplicación:  
+}
+```
 node app.js
+}
+```
