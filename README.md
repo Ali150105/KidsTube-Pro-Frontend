@@ -3,9 +3,13 @@
 
 ## Descripción  
 
-KidsTube_Server es una aplicación web destinada a padres que deseen controlar los contenidos que sus hijos pueden ver en línea. Permite a los padres seleccionar los contenidos específicos a los que sus hijos tienen acceso. Estos contenidos pueden ser videos de YouTube o videos que los padres carguen directamente a la lista de videos.  
+KidsTube es una solución tecnológica integral diseñada para facilitar el control parental sobre el consumo de contenido multimedia infantil. La plataforma permite:
 
-La aplicación utiliza Node.js como entorno de ejecución, Express.js como framework web y Mongoose como biblioteca de modelado de objetos para MongoDB, lo que proporciona una base sólida para la construcción de una API RESTful para gestionar los datos de los usuarios y los videos.  
+Curar contenido digital: Selección y aprobación de material audiovisual procedente de YouTube o cargado directamente por los tutores
+
+Gestionar perfiles: Creación de entornos personalizados por cada menor
+
+Supervisar accesos: Registro detallado de interacciones y tiempos de visualización
 
 ## Diagrama 
 
