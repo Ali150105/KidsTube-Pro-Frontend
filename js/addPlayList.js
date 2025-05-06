@@ -10,6 +10,61 @@ $(document).ready(function () {
     obtenerPerfiles();  // Cargar perfiles para los selects
 });
 
+
+// Función para obtener y mostrar las playlists
+const obtenerPerfiles = async () => {
+    try {
+        const authToken = localStorage.getItem('token');
+        if (!authToken) {
+            throw new Error('Token de autorización no proporcionado');
+        }
+
+        const query = `
+            query {
+                profiles {
+                    id
+                    nombreCompleto
+                }
+            }
+        `;
+
+        const response = await fetch('http://localhost:4000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ query })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.errors?.[0]?.message || 'Error al obtener los perfiles');
+        }
+
+        const data = await response.json();
+        console.log('Respuesta de perfiles:', data); // Depuración
+        if (data.errors) {
+            throw new Error(data.errors[0].message || 'Error en la consulta GraphQL');
+        }
+
+        const perfiles = data.data.profiles;
+        const selectAgregar = document.getElementById('perfilesAsociados');
+        const selectEditar = document.getElementById('editPerfilesAsociados');
+        perfiles.forEach(perfil => {
+            const option = document.createElement('option');
+            option.value = perfil.id;
+            option.textContent = perfil.nombreCompleto;
+            if (selectAgregar) selectAgregar.appendChild(option.cloneNode(true));
+            if (selectEditar) selectEditar.appendChild(option.cloneNode(true));
+        });
+    } catch (error) {
+        console.error('Error al obtener perfiles:', error);
+        alert('Hubo un error al cargar los perfiles: ' + error.message);
+    }
+};
+
+
 // Función para obtener y mostrar las playlists
 const obtenerPlaylists = async () => {
     try {
